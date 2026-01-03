@@ -1,7 +1,7 @@
 import hashlib
 
 
-def hash_feature(value: str, num_buckets: int = 1000) -> int
+def hash_feature(value: str, num_buckets: int = 1000) -> int:
     """
     Stable hashing (same input -> same bucket).
     """
