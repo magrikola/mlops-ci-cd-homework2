@@ -1,0 +1,42 @@
+name: CI-CD Pipeline
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+
+jobs:
+  pipeline:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Unit Tests
+        run: pytest tests/test_features.py
+
+      - name: Lint
+        run: flake8 src
+
+      - name: Component Tests
+        run: pytest tests/test_component.py
+
+      - name: Package (Docker Build)
+        run: docker build -t test-image .
+
+      - name: Smoke Test
+        run: |
+          docker run -d --name mlops-test -p 8000:8000 test-image
+          sleep 5
+          curl -f http://localhost:8000/health
+          curl -f "http://localhost:8000/predict?text=test&buckets=10"
+          docker rm -f mlops-test
